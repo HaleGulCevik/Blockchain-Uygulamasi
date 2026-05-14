@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulut Blockchain DApp</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #1e1e2f; color: white; padding: 40px; text-align: center; }
+        .container { background: #2a2a40; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        input { padding: 10px; width: 250px; border-radius: 5px; border: none; margin-right: 10px; }
+        button { background-color: #627eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #4a63c2; }
+        #sonuc { margin-top: 20px; color: #00ffcc; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Ethereum Veri Kayıt Sistemi</h2>
+        <p>Ağdaki Mevcut Veri: <span id="mevcutVeri">Yükleniyor...</span></p>
+        
+        <input type="text" id="veriGirdisi" placeholder="Blockchain'e kazınacak mesajı yazın">
+        <button onclick="veriGonder()">Ağa Gönder</button>
+        
+        <div id="sonuc"></div>
+    </div>
+
+    <script>
+        async function veriyiGetir() {
+            const response = await fetch('/api/veri');
+            const data = await response.json();
+            document.getElementById('mevcutVeri').innerText = data.veri || "Veri yok";
+        }
+
+        async function veriGonder() {
+            const yeniVeri = document.getElementById('veriGirdisi').value;
+            const sonucDiv = document.getElementById('sonuc');
+            sonucDiv.innerText = "İşlem ağda onaylanıyor, lütfen bekleyin (yaklaşık 10-15 saniye)...";
+
+            const response = await fetch('/api/veri', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ yeniVeri })
+            });
+            const data = await response.json();
+            
+            if(data.islemHash) {
+                sonucDiv.innerHTML = `${data.mesaj}<br><br>İşlem Kodu (Hash): ${data.islemHash}`;
+                veriyiGetir(); // Ekrandaki veriyi güncelle
+            } else {
+                sonucDiv.innerText = "Bir hata oluştu.";
+            }
+        }
+
+        veriyiGetir();
+    </script>
+</body>
+</html>
